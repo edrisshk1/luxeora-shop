@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import ProductCard from '@/components/ProductCard';
@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default function ProductsPage() {
+function ProductsContent() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -44,7 +44,7 @@ export default function ProductsPage() {
   }, [category]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <>
       <h1 className="text-4xl font-bold text-luxury-dark mb-4">
         {category ? `${category.charAt(0).toUpperCase() + category.slice(1)}` : 'All Products'}
       </h1>
@@ -64,6 +64,16 @@ export default function ProductsPage() {
           <p className="text-gray-600 text-lg">No products found. Check back soon!</p>
         </div>
       )}
+    </>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <Suspense fallback={<div className="flex justify-center items-center h-96"><div className="animate-spin text-4xl">⏳</div></div>}>
+        <ProductsContent />
+      </Suspense>
     </div>
   );
 }
