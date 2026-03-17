@@ -1,7 +1,27 @@
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 
 export const dynamic = 'force-dynamic';
+
+export async function GET(request) {
+  try {
+    const ordersCollection = collection(db, 'orders');
+    const snapshot = await getDocs(ordersCollection);
+    
+    const orders = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return Response.json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
 
 export async function POST(request) {
   try {

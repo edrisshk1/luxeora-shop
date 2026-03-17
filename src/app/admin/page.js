@@ -50,10 +50,14 @@ export default function AdminPage() {
           setProducts(productsData.data || []);
         }
 
-        // Fetch orders (for now, we can't read them via API due to security, so show message)
-        // In production, you'd need to create an authenticated admin API endpoint
-        toast.success('Check Firebase Console → Firestore Database → orders collection to view orders');
-        setOrders([]);
+        // Fetch orders via API
+        const ordersRes = await fetch('/api/orders');
+        if (ordersRes.ok) {
+          const ordersData = await ordersRes.json();
+          setOrders(ordersData.data || []);
+        } else {
+          toast.error('Failed to load orders');
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load data');
