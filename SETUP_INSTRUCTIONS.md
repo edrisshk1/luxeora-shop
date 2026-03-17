@@ -197,19 +197,37 @@ Replace `YOUR_USERNAME` with your GitHub username.
 
 ### Add Environment Variables:
 1. In Vercel, go to Settings → Environment Variables
-2. Add all variables from `.env.local`:
-   - NEXT_PUBLIC_FIREBASE_API_KEY
-   - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-   - NEXT_PUBLIC_FIREBASE_PROJECT_ID
-   - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-   - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-   - NEXT_PUBLIC_FIREBASE_APP_ID
+2. For each variable from your `.env.local` file:
+   - Click "Add New"
+   - **Name**: `NEXT_PUBLIC_FIREBASE_API_KEY` | **Value**: Your actual API key from Firebase
+   - **Name**: `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | **Value**: Your auth domain
+   - **Name**: `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | **Value**: Your project ID
+   - **Name**: `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | **Value**: Your storage bucket
+   - **Name**: `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | **Value**: Your messaging sender ID
+   - **Name**: `NEXT_PUBLIC_FIREBASE_APP_ID` | **Value**: Your app ID
+3. After adding all variables, click "Save"
 
-3. Click "Deploy"
+### Trigger the Deployment:
+1. Go back to the "Deployments" tab in Vercel
+2. Find your latest deployment (should show as "Building" or "Queued")
+3. Wait for it to complete (usually 2-5 minutes)
+4. You'll see a status change:
+   - ⏳ Building → ✅ Ready (success!)
+   - If it fails, check the logs and verify your Firebase credentials
+
+### Test Your Live Site:
+1. Once deployment shows ✅ Ready, click on the deployment
+2. Click "Visit" or copy your site URL: `https://luxury-shop-YOUR_VERCEL_NAME.vercel.app`
+3. Test the site:
+   - Browse products
+   - Add items to cart
+   - Check admin dashboard at `/admin`
+4. Your site automatically updates when you push code to GitHub
 
 ### Your Site is Live! 🎉
-- Visit: https://luxury-shop-YOUR_NAME.vercel.app
-- Automatically updates when you push to GitHub
+- Your live URL: `https://luxury-shop-YOUR_VERCEL_NAME.vercel.app`
+- Automatically rebuilds and deploys when you push to GitHub
+- Check "Deployments" tab to see deployment history
 
 ---
 
