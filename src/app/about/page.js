@@ -9,7 +9,7 @@ export default function About() {
         <div>
           <h2 className="text-2xl font-bold text-luxury-dark mb-4">Our Story</h2>
           <p className="text-gray-600 leading-relaxed mb-4">
-            Founded in 2024, Luxury Shop is dedicated to bringing the world's most prestigious designer bags, shoes, and accessories to discerning customers worldwide.
+            Founded in 2024, Luxury Shop is dedicated to bringing the world&apos;s most prestigious designer bags, shoes, and accessories to discerning customers worldwide.
           </p>
           <p className="text-gray-600 leading-relaxed">
             We carefully curate every piece in our collection, ensuring authenticity and exceptional quality. Our mission is to make luxury accessible while maintaining the highest standards of customer service.
