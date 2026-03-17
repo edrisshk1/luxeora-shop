@@ -8,6 +8,13 @@ import toast from 'react-hot-toast';
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
   const [isCheckout, setIsCheckout] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [customer, setCustomer] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+  });
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = total * 0.1;
@@ -20,6 +27,14 @@ export default function CartPage() {
       return;
     }
 
+    // Validate customer info
+    if (!customer.name || !customer.email || !customer.address) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const orderData = {
         items: cart,
@@ -28,10 +43,11 @@ export default function CartPage() {
         shipping: cart.length > 0 ? 20 : 0,
         total: finalTotal,
         status: 'pending',
-        customerEmail: 'customer@example.com', // TODO: Get from form
-        customerName: 'Customer', // TODO: Get from form
-        customerPhone: '', // TODO: Get from form
-        customerAddress: '', // TODO: Get from form
+        customerEmail: customer.email,
+        customerName: customer.name,
+        customerPhone: customer.phone,
+        customerAddress: customer.address,
+        createdAt: new Date().toISOString(),
       };
 
       const response = await fetch('/api/orders', {
@@ -50,10 +66,13 @@ export default function CartPage() {
 
       toast.success(`Order placed successfully! Order ID: ${result.orderId}`);
       clearCart();
+      setCustomer({ name: '', email: '', phone: '', address: '' });
       setIsCheckout(false);
     } catch (error) {
       console.error('Order error:', error);
       toast.error(error.message || 'Failed to place order');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,7 +176,7 @@ export default function CartPage() {
       {/* Checkout Modal */}
       {isCheckout && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full max-h-96 overflow-y-auto">
             <h2 className="text-2xl font-bold text-luxury-dark mb-4">Checkout</h2>
             <form
               onSubmit={(e) => {
@@ -166,11 +185,49 @@ export default function CartPage() {
               }}
               className="space-y-4"
             >
-              <input type="text" placeholder="Full Name" className="w-full border border-gray-300 rounded px-4 py-2" required />
-              <input type="email" placeholder="Email" className="w-full border border-gray-300 rounded px-4 py-2" required />
-              <input type="text" placeholder="Address" className="w-full border border-gray-300 rounded px-4 py-2" required />
-              <input type="text" placeholder="City" className="w-full border border-gray-300 rounded px-4 py-2" required />
-              <input type="text" placeholder="ZIP Code" className="w-full border border-gray-300 rounded px-4 py-2" required />
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Full Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="Full Name" 
+                  value={customer.name}
+                  onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-4 py-2" 
+                  required 
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Email *</label>
+                <input 
+                  type="email" 
+                  placeholder="Email" 
+                  value={customer.email}
+                  onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-4 py-2" 
+                  required 
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Phone</label>
+                <input 
+                  type="tel" 
+                  placeholder="Phone Number" 
+                  value={customer.phone}
+                  onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-4 py-2" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Address *</label>
+                <input 
+                  type="text" 
+                  placeholder="Street Address" 
+                  value={customer.address}
+                  onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-4 py-2" 
+                  required 
+                />
+              </div>
 
               <div className="bg-luxury-light p-4 rounded">
                 <p className="text-sm text-gray-600 mb-2">Total Amount:</p>
@@ -180,14 +237,16 @@ export default function CartPage() {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-luxury-gold text-luxury-dark py-2 rounded font-bold hover:bg-white transition"
+                  disabled={loading}
+                  className="flex-1 bg-luxury-gold text-luxury-dark py-2 rounded font-bold hover:bg-white transition disabled:opacity-50"
                 >
-                  Place Order
+                  {loading ? 'Processing...' : 'Place Order'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsCheckout(false)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded font-bold hover:bg-gray-400 transition"
+                  disabled={loading}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded font-bold hover:bg-gray-400 transition disabled:opacity-50"
                 >
                   Cancel
                 </button>
