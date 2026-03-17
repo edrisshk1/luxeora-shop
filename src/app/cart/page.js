@@ -21,12 +21,39 @@ export default function CartPage() {
     }
 
     try {
-      // In production, integrate with Stripe or payment gateway
-      toast.success('Order placed successfully! You will receive a confirmation email.');
+      const orderData = {
+        items: cart,
+        subtotal: total,
+        tax: total * 0.1,
+        shipping: cart.length > 0 ? 20 : 0,
+        total: finalTotal,
+        status: 'pending',
+        customerEmail: 'customer@example.com', // TODO: Get from form
+        customerName: 'Customer', // TODO: Get from form
+        customerPhone: '', // TODO: Get from form
+        customerAddress: '', // TODO: Get from form
+      };
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to place order');
+      }
+
+      toast.success(`Order placed successfully! Order ID: ${result.orderId}`);
       clearCart();
       setIsCheckout(false);
     } catch (error) {
-      toast.error('Failed to place order');
+      console.error('Order error:', error);
+      toast.error(error.message || 'Failed to place order');
     }
   };
 
