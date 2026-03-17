@@ -70,13 +70,66 @@ export default function AdminPage() {
     fetchData();
   }, [user]);
 
-  const handleAddProduct = (e) => {
+  const handleAddProduct = async (e) => {
     e.preventDefault();
-    toast.success('To add products, go to Firebase Console → Firestore Database → products collection');
+    if (!newProduct.name || !newProduct.price) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to add product');
+      }
+
+      toast.success('Product added successfully!');
+      setNewProduct({ name: '', price: '', category: 'bags', description: '', image: '' });
+      setShowForm(false);
+
+      // Refresh products list
+      const productsRes = await fetch('/api/products');
+      if (productsRes.ok) {
+        const productsData = await productsRes.json();
+        setProducts(productsData.data || []);
+      }
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast.error(error.message || 'Failed to add product');
+    }
   };
 
-  const handleDeleteProduct = (productId) => {
-    toast.success('To delete products, go to Firebase Console → Firestore Database → products collection');
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/products?id=${productId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete product');
+      }
+
+      setProducts(products.filter((p) => p.id !== productId));
+      toast.success('Product deleted successfully');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error(error.message || 'Failed to delete product');
+    }
   };
 
   if (loading) {
