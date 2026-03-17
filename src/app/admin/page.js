@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 export default function AdminPage() {
@@ -36,25 +34,26 @@ export default function AdminPage() {
     }
   }, [user, router]);
 
-  // Fetch products and orders
+  // Fetch products and orders via API
   useEffect(() => {
+    if (!user || !user.email?.includes('admin')) {
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
-        const productsSnapshot = await getDocs(collection(db, 'products'));
-        setProducts(
-          productsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        );
+        // Fetch products via API
+        const productsRes = await fetch('/api/products');
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          setProducts(productsData.data || []);
+        }
 
-        const ordersSnapshot = await getDocs(collection(db, 'orders'));
-        setOrders(
-          ordersSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        );
+        // Fetch orders (for now, we can't read them via API due to security, so show message)
+        // In production, you'd need to create an authenticated admin API endpoint
+        toast.info('To view orders, check Firebase Console → Firestore Database → orders collection');
+        setOrders([]);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load data');
@@ -64,41 +63,15 @@ export default function AdminPage() {
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
-  const handleAddProduct = async (e) => {
+  const handleAddProduct = (e) => {
     e.preventDefault();
-    if (!newProduct.name || !newProduct.price) {
-      toast.error('Please fill all fields');
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, 'products'), {
-        ...newProduct,
-        price: parseFloat(newProduct.price),
-        rating: 5,
-        createdAt: new Date(),
-      });
-      toast.success('Product added successfully!');
-      setNewProduct({ name: '', price: '', category: 'bags', description: '', image: '' });
-      setShowForm(false);
-      // Refresh products list
-      const snapshot = await getDocs(collection(db, 'products'));
-      setProducts(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    } catch (error) {
-      toast.error('Failed to add product');
-    }
+    toast.info('To add products, go to Firebase Console → Firestore Database → products collection');
   };
 
-  const handleDeleteProduct = async (productId) => {
-    try {
-      await deleteDoc(doc(db, 'products', productId));
-      setProducts(products.filter((p) => p.id !== productId));
-      toast.success('Product deleted');
-    } catch (error) {
-      toast.error('Failed to delete product');
-    }
+  const handleDeleteProduct = (productId) => {
+    toast.info('To delete products, go to Firebase Console → Firestore Database → products collection');
   };
 
   if (loading) {
