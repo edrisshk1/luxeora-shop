@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import ProductCard from '@/components/ProductCard';
 import { useSearchParams } from 'next/navigation';
 
@@ -17,24 +15,19 @@ function ProductsContent() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productsCollection = collection(db, 'products');
-        let q;
-
+        let url = '/api/products';
         if (category && category !== 'all') {
-          q = query(productsCollection, where('category', '==', category));
-        } else {
-          q = query(productsCollection);
+          url += `?category=${encodeURIComponent(category)}`;
         }
 
-        const snapshot = await getDocs(q);
-        const productsData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setProducts(productsData);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch products');
+        
+        const data = await response.json();
+        setProducts(data.data || []);
       } catch (error) {
         console.error('Error fetching products:', error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
