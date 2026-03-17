@@ -52,7 +52,7 @@ export default function AdminPage() {
 
         // Fetch orders (for now, we can't read them via API due to security, so show message)
         // In production, you'd need to create an authenticated admin API endpoint
-        toast.info('To view orders, check Firebase Console → Firestore Database → orders collection');
+        toast.success('Check Firebase Console → Firestore Database → orders collection to view orders');
         setOrders([]);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -67,11 +67,11 @@ export default function AdminPage() {
 
   const handleAddProduct = (e) => {
     e.preventDefault();
-    toast.info('To add products, go to Firebase Console → Firestore Database → products collection');
+    toast.success('To add products, go to Firebase Console → Firestore Database → products collection');
   };
 
   const handleDeleteProduct = (productId) => {
-    toast.info('To delete products, go to Firebase Console → Firestore Database → products collection');
+    toast.success('To delete products, go to Firebase Console → Firestore Database → products collection');
   };
 
   if (loading) {
